@@ -24,3 +24,7 @@ def nginx_stat_log(nginx_collection):
     print("\tmethod PATCH: {:d}". format(patch))
     print("\tmethod DELETE: {:d}". format(delete))
     print("{:d} status check". format(path))
+
+
+if __name__ == "__main__":
+    nginx_stat_log()
