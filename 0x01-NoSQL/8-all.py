@@ -3,10 +3,10 @@
 
 def list_all(mongo_collection)
     """A function that lists all documents"""
-    All_documents = mongo_collection.find()
+    all_documents = mongo_collection.find()
 
-    if All_documents.count() == 0:
+    if all_documents.count() == 0:
         return []
 
-    return All_documents
+    return all_documents
 
