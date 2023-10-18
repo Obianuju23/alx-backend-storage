@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
-"""Python script that provides some stats about Nginx logs stored in MongoDB"""
+"""
+This module contains a function that provides
+some stats about Nginx logs stored in MongoDB
+"""
 from pymongo import MongoClient
 
 
-def nginx_stat_log():
-    """Function that provide some stats about Nginx logs"""
+def log_statistics():
+    """a function that provides some stats about nginx logs"""
     client = MongoClient()
-    database = client.logs
-    collection = database.nginx
+    db = client.logs
+    collection = db.nginx
 
-    Total_docs = collection.count_docs({})
-    get = collection.count_docs({"method": "GET"})
-    post = collection.count_docs({"method": "POST"})
-    put = collection.count_docs({"method": "PUT"})
-    patch = collection.count_docs({"method": "PATCH"})
-    delete = collection.count_docs({"method": "DELETE"})
-    path = collection.count_docs({"method": "GET", "path": "/status"})
+    total = collection.count_documents({})
+    get = collection.count_documents({"method": "GET"})
+    post = collection.count_documents({"method": "POST"})
+    put = collection.count_documents({"method": "PUT"})
+    patch = collection.count_documents({"method": "PATCH"})
+    delete = collection.count_documents({"method": "DELETE"})
+    path = collection.count_documents({"method": "GET", "path": "/status"})
 
     print("{:d} logs". format(total))
     print("Methods:")
@@ -28,4 +31,4 @@ def nginx_stat_log():
 
 
 if __name__ == "__main__":
-    nginx_stat_log()
+    log_statistics()
