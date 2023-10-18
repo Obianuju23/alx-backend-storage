@@ -1,31 +1,27 @@
 #!/usr/bin/env python3
-"""log stats from collection
-"""
-from pymongo import MongoClient
+"""Python script that provides stats about Nginx logs stored in MongoDB"""
+import pymongo from MongoClient
 
 
-METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
+def collection(database: dict) -> int:
+    """Function to retroeve logs information"""
+    client = pymongo.MongoClient('mongodb://127.0.0.1:27017')
+    logs = client.logs.nginx
+    return logs.count_documents(database)
 
 
-def log_stats(mongo_collection, option=None):
-    """ script that provides some stats about Nginx logs stored in MongoDB
-    """
-    items = {}
-    if option:
-        value = mongo_collection.count_documents(
-            {"method": {"$regex": option}})
-        print(f"\tmethod {option}: {value}")
-        return
+def main():
+    """Function that returns stats about Nginx logs stored in MongoDB"""
 
-    result = mongo_collection.count_documents(items)
-    print(f"{result} logs")
+    print(f"{collection({})} logs")
     print("Methods:")
-    for method in METHODS:
-        log_stats(nginx_collection, method)
-    status_check = mongo_collection.count_documents({"path": "/status"})
-    print(f"{status_check} status check")
+    print(f"\tmethod GET: {collection({'method': 'GET'})}")
+    print(f"\tmethod POST: {collection({'method': 'POST'})}")
+    print(f"\tmethod PUT: {collection({'method': 'PUT'})}")
+    print(f"\tmethod PATCH: {collection({'method': 'PATCH'})}")
+    print(f"\tmethod DELETE: {collection({'method': 'DELETE'})}")
+    print(f"{collection({'method': 'GET', 'path': '/status'})} status check")
 
 
 if __name__ == "__main__":
-    nginx_collection = MongoClient('mongodb://127.0.0.1:27017').logs.nginx
-    log_stats(nginx_collection)
+    main()
