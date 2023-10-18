@@ -1,10 +1,44 @@
 #!/usr/bin/env python3
-"""This module handling Redis client for data storage"""
+"""Module handling Redis client for data storage"""
 import redis
 from uuid import uuid4
 from typing import Union
 from typing import Optional, Callable
 from functools import wraps
+
+
+# Task 3: Storing lists
+def call_history(method: Callable) -> Callable:
+    """Function to store the history of inputs and outputs of a function"""
+
+    key = method.__qualname__
+    inputs = key + ":inputs"
+    outputs = key + ":outputs"
+
+    @wraps(method)
+    def wrapper(self, *args, **kwds):
+        """Function that defines wrapper"""
+
+        self._redis.rpush(inputs, str(args))
+        data = method(self, *args, **kwds)
+        self._redis.rpush(outputs, str(data))
+        return data
+    return wrapper
+
+
+# Task 2: Incrementing values
+def count_calls(method: Callable) -> Callable:
+    """Function to count no. of times methods of Cache are called"""
+
+    key = method.__qualname__
+
+    @wraps(method)
+    def wrapper(self, *args, **kwds):
+        """Funtion that defines wrapper"""
+
+        self._redis.incr(key)
+        return method(self, *args, **kwds)
+    return wrapper
 
 
 # Task 0: Writing strings to Redis
@@ -26,8 +60,7 @@ class Cache:
         self._redis.set(key, data)
         return key
 
-
- Task 1: Reading from Redis and recovering original type
+    # Task 1: Reading from Redis and recovering original type
     def get(self, key: str, fn: Optional[Callable] = None) -> Union[
             str, bytes, int, float]:
         """Method that converts data back to original format"""
@@ -53,38 +86,6 @@ class Cache:
             data = 0
         return data
 
-# Task 2: Incrementing values
-def count_calls(method: Callable) -> Callable:
-    """Function to count no. of times methods of Cache are called"""
-
-    key = method.__qualname__
-
-    @wraps(method)
-    def wrapper(self, *args, **kwds):
-        """Funtion that defines wrapper"""
-
-        self._redis.incr(key)
-        return method(self, *args, **kwds)
-    return wrapper
-
-
-# Task 3: Storing lists
-def call_history(method: Callable) -> Callable:
-    """Function to store the history of inputs and outputs of a function"""
-
-    key = method.__qualname__
-    inputs = key + ":inputs"
-    outputs = key + ":outputs"
-
-    @wraps(method)
-    def wrapper(self, *args, **kwds):
-        """Function that defines wrapper"""
-
-        self._redis.rpush(inputs, str(args))
-        data = method(self, *args, **kwds)
-        self._redis.rpush(outputs, str(data))
-        return data
-    return wrapper
 
 # Task 4: Retrieving lists
 def replay(method: Callable):
