@@ -3,28 +3,38 @@
 from pymongo import MongoClient
 
 
-def nginx_stat_log():
-    """Function that provides some stats about Nginx logs"""
-    client = MongoClient()
-    collection = client.logs.nginx
+def collection(db: dict) -> int:
+    """Function to retroeve logs information"""
+    client = pymongo.MongoClient('mongodb://127.0.0.1:27017')
+    logs = client.logs.nginx
+    return logs.count_documents(db)
 
-    Total_docs = collection.count_documents({})
-    get = collection.count_documents({"method": "GET"})
-    post = collection.count_documents({"method": "POST"})
-    put = collection.count_documents({"method": "PUT"})
-    patch = collection.count_documents({"method": "PATCH"})
-    delete = collection.count_documents({"method": "DELETE"})
-    path = collection.count_documents({"method": "GET", "path": "/status"})
 
-    print("{:d} logs".format(Total_docs))
+def main():
+    """Function that returns stats about Nginx logs stored in MongoDB"""
+
+    print(f"{collection({})} logs")
     print("Methods:")
-    print("\tmethod GET: {:d}".format(get))
-    print("\tmethod POST: {:d}".format(post))
-    print("\tmethod PUT: {:d}".format(put))
-    print("\tmethod PATCH: {:d}".format(patch))
-    print("\tmethod DELETE: {:d}".format(delete))
-    print("{:d} status check".format(path))
+    print(f"\tmethod GET: {collection({'method': 'GET'})}")
+    print(f"\tmethod POST: {collection({'method': 'POST'})}")
+    print(f"\tmethod PUT: {collection({'method': 'PUT'})}")
+    print(f"\tmethod PATCH: {collection({'method': 'PATCH'})}")
+    print(f"\tmethod DELETE: {collection({'method': 'DELETE'})}")
+    print(f"{collection({'method': 'GET', 'path': '/status'})} status check")
+
+    print("IPs:")
+    client = pymongo.MongoClient('mongodb://127.0.0.1:27017')
+    logs = client.logs.nginx
+    ips = logs.aggregate(
+            [{"$group": {"_id": "$ip", "count": {"$sum": 1}}},
+                {"$sort": {"count": -1}}])
+    count = 0
+    for ip in ips:
+        if count == 10:
+            break
+        print(f"\t{ip.get('_id')}: {ip.get('count')}")
+        count += 1
 
 
 if __name__ == "__main__":
-    nginx_stat_log()
+    main()
