@@ -6,7 +6,8 @@ from pymongo import MongoClient
 def nginx_stat_log():
     """Function that provide some stats about Nginx logs"""
     client = MongoClient()
-    collection = client.logs.nginx
+    database = client.logs
+    collection = database.nginx
 
     Total_docs = collection.count_docs({})
     get = collection.count_docs({"method": "GET"})
