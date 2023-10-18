@@ -3,11 +3,11 @@
 import pymongo from MongoClient
 
 
-def collection(database: dict) -> int:
+def collection(db: dict) -> int:
     """Function to retroeve logs information"""
     client = pymongo.MongoClient('mongodb://127.0.0.1:27017')
     logs = client.logs.nginx
-    return logs.count_documents(database)
+    return logs.count_documents(db)
 
 
 def main():
